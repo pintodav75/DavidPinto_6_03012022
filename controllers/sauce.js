@@ -1,5 +1,6 @@
 const Sauce = require('../models/sauce');
 const fs = require('fs');
+const req = require('express/lib/request');
 
 exports.createSauce = (req, res, next) => {
     const sauceObject = JSON.parse(req.body.sauce)
@@ -41,3 +42,43 @@ exports.createSauce = (req, res, next) => {
     })
     .catch(error => res.status(500).json({ error }));
   });
+
+  exports.modifySauce = ((req, res, next) => {
+    Sauce.updateOne({ _id:req.params.id }, { ...req.body, _id: req.params.id })
+    .then(() => res.status(200).json({ message: 'Objet modifie' }))
+    .catch(error => res.status(400).json({ error }));
+  });
+
+ exports.sauceLike = ((req, res, next) => {
+   let like = req.body.like
+   let sauceId = req.params.id
+   let userId = req.body.id
+
+   if( like == 1)
+   {
+     Sauce.updateOne(
+       {_id: sauceId},
+       {
+         $push: { usersLiked: userId},
+         $inc: { likes: +1}
+       }
+     )
+     .then(() => res.status(200).json({ message: 'like ajoute !' }))
+     .catch((error) => res.status(400).json({ error }))
+   }
+   if (like == -1)
+   {
+     Sauce.updateOne(
+       {_id: sauceId},
+       {
+         $push: { usersdisLiked: userId },
+         $inc: { dislikes: +1 }
+       }
+     )
+     .then(() => res.status(200).json({ message: 'dislike ajoute !' }))
+     .catch((error) => res.status(400).json({ error }))
+   }
+
+
+   
+ });
